@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: school-management
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5433/school_db
+    username: postgres
+    password: bedoui
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: mySecretKeyForJWTTokenGenerationThatIsLongEnough
+  expiration: 86400000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
