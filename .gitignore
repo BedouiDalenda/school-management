@@ -1,0 +1,29 @@
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+
+# Backend (Maven)
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Frontend (Angular)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+*.env
+
+# Docker
+*.log
+
+# Build artifacts
+*.jar.original
