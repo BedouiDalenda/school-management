@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # ===========================
+  # PostgreSQL Database
+  # ===========================
+  database:
+    image: postgres:16-alpine
+    container_name: school-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: school_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: votre mot de passe
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - school-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d school_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ===========================
+  # Spring Boot Backend
+  # ===========================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: school-backend-api
+    restart: unless-stopped
+    environment:
+      # Configuration de la base de données
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/school_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: votre mot de passe 
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      
+      # Configuration JPA/Hibernate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      
+      # Configuration JWT
+      JWT_SECRET: mySecretKeyForJWTTokenGenerationThatIsLongEnough (votre key)
+      JWT_EXPIRATION: 86400000
+      
+      # Configuration Spring
+      SPRING_APPLICATION_NAME: school-management
+      
+      # Configuration Swagger/OpenAPI
+      SPRINGDOC_API_DOCS_PATH: /v3/api-docs
+      SPRINGDOC_SWAGGER_UI_PATH: /swagger-ui.html
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - school-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ===========================
+  # Angular Frontend
+  # ===========================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: school-frontend-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # Alternative si le port 80 est déjà utilisé :
+      # - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - school-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# ===========================
+# Networks
+# ===========================
+networks:
+  school-network:
+    driver: bridge
+    name: school-management-network
+
+# ===========================
+# Volumes (Persistance des données)
+# ===========================
+volumes:
+  postgres_data:
+    driver: local
+    name: school-postgres-data

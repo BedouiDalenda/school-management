@@ -1,0 +1,85 @@
+<div style="padding: 20px;">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+    <h2>Students Management</h2>
+    <button (click)="logout()" style="padding: 10px; background: red; color: white; border: none; cursor: pointer;">Logout</button>
+  </div>
+
+  <!-- Message d'erreur global -->
+  <div *ngIf="errorMessage" style="color: red; margin-bottom: 10px; padding: 10px; background: #ffe6e6; border-radius: 4px;">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Search & Filter -->
+  <div style="margin-bottom: 20px;">
+    <input [(ngModel)]="searchQuery" placeholder="Search by username..." style="padding: 10px; width: 200px;">
+    <button (click)="search()" [disabled]="loading" style="padding: 10px; margin-left: 10px; cursor: pointer;">Search</button>
+    
+    <select [(ngModel)]="selectedLevel" style="padding: 10px; margin-left: 20px;">
+      <option value="">All Levels</option>
+      <option *ngFor="let level of levels" [value]="level">{{ level }}</option>
+    </select>
+    <button (click)="filter()" [disabled]="loading" style="padding: 10px; margin-left: 10px; cursor: pointer;">Filter</button>
+    
+    <button (click)="openForm()" [disabled]="loading" style="padding: 10px; margin-left: 20px; background: green; color: white; border: none; cursor: pointer;">+ Add Student</button>
+  </div>
+
+  <!-- Spinner pendant le chargement -->
+  <div *ngIf="loading" style="margin: 10px 0; color: #666;">Loading...</div>
+
+  <!-- Table des étudiants -->
+  <table border="1" style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="background: #f0f0f0;">
+        <th style="padding: 10px;">ID</th>
+        <th style="padding: 10px;">Username</th>
+        <th style="padding: 10px;">Level</th>
+        <th style="padding: 10px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let student of students">
+        <td style="padding: 10px;">{{ student.id }}</td>
+        <td style="padding: 10px;">{{ student.username }}</td>
+        <td style="padding: 10px;">{{ student.level }}</td>
+        <td style="padding: 10px;">
+          <button (click)="openForm(student)" [disabled]="loading" style="margin-right: 5px; cursor: pointer;">Edit</button>
+          <button (click)="delete(student.id)" [disabled]="loading || !student.id" style="background: red; color: white; border: none; padding: 8px 12px; cursor: pointer;">
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Message si aucun étudiant -->
+  <div *ngIf="!loading && students.length === 0" style="text-align: center; padding: 20px; color: #666;">
+    No students found.
+  </div>
+
+  <!-- Formulaire modal -->
+  <div *ngIf="showForm" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    <div style="background: white; padding: 30px; border-radius: 5px; width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h3>{{ editMode ? 'Edit Student' : 'Add Student' }}</h3>
+      
+      <div style="margin: 10px 0;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Username *</label>
+        <input [(ngModel)]="currentStudent.username" placeholder="Enter username" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+      </div>
+      
+      <div style="margin: 10px 0;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Level *</label>
+        <select [(ngModel)]="currentStudent.level" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+          <option value="">-- Select Level --</option>
+          <option *ngFor="let level of levels" [value]="level">{{ level }}</option>
+        </select>
+      </div>
+      
+      <div style="margin-top: 20px;">
+        <button (click)="save()" [disabled]="loading || !currentStudent.username || !currentStudent.level" style="padding: 10px 20px; background: green; color: white; border: none; margin-right: 10px; cursor: pointer; border-radius: 4px;">
+          {{ loading ? 'Saving...' : 'Save' }}
+        </button>
+        <button (click)="closeForm()" [disabled]="loading" style="padding: 10px 20px; background: #ccc; border: none; cursor: pointer; border-radius: 4px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

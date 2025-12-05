@@ -1,0 +1,21 @@
+<div style="max-width: 400px; margin: 100px auto; padding: 20px; border: 1px solid #ccc;">
+  <h2>Login</h2>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="error" style="color: red; margin-bottom: 10px;">{{ error }}</div>
+
+  <!-- Inputs -->
+  <input [(ngModel)]="username" placeholder="Username" style="width: 100%; padding: 10px; margin: 10px 0;">
+  <input [(ngModel)]="password" type="password" placeholder="Password" style="width: 100%; padding: 10px; margin: 10px 0;">
+
+  <!-- Bouton Login désactivé pendant loading -->
+  <button 
+    (click)="login()" 
+    [disabled]="loading"
+    style="width: 100%; padding: 10px; background: blue; color: white; border: none; cursor: pointer;">
+    {{ loading ? 'Logging in...' : 'Login' }}
+  </button>
+
+  <!-- Spinner simple -->
+  <div *ngIf="loading" style="margin-top: 10px;">Loading...</div>
+</div>
