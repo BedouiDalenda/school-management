@@ -7,6 +7,7 @@ import com.school.management.enums.Level;
 import com.school.management.exception.DuplicateResourceException;
 import com.school.management.exception.ResourceNotFoundException;
 import com.school.management.repository.StudentRepository;
+import com.school.management.mapper.StudentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,14 +22,14 @@ public class StudentService {
     // GET all students with pagination
     public Page<StudentResponse> getAllStudents(Pageable pageable) {
         return studentRepository.findAll(pageable)
-            .map(this::toResponse);
+            .map(StudentMapper::toResponse);
     }
     
     // GET student by ID
     public StudentResponse getStudentById(Long id) {
         Student student = studentRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
-        return toResponse(student);
+        return StudentMapper.toResponse(student); 
     }
     
     // CREATE student
@@ -39,7 +40,7 @@ public class StudentService {
         
         Student student = new Student(null, request.getUsername(), request.getLevel());
         Student savedStudent = studentRepository.save(student);
-        return toResponse(savedStudent);
+        return StudentMapper.toResponse(savedStudent);
     }
     
     // UPDATE student
@@ -57,7 +58,7 @@ public class StudentService {
         student.setLevel(request.getLevel());
         
         Student updatedStudent = studentRepository.save(student);
-        return toResponse(updatedStudent);
+        return StudentMapper.toResponse(updatedStudent);
     }
     
     // DELETE student
@@ -71,21 +72,14 @@ public class StudentService {
     // SEARCH students by username or ID
     public Page<StudentResponse> searchStudents(String search, Pageable pageable) {
         return studentRepository.searchStudents(search, pageable)
-            .map(this::toResponse);
+            .map(StudentMapper::toResponse); 
     }
     
     // FILTER students by level
     public Page<StudentResponse> filterByLevel(Level level, Pageable pageable) {
         return studentRepository.findByLevel(level, pageable)
-            .map(this::toResponse);
+            .map(StudentMapper::toResponse); 
     }
     
-    // Mapper Entity -> Response DTO
-    private StudentResponse toResponse(Student student) {
-        return new StudentResponse(
-            student.getId(),
-            student.getUsername(),
-            student.getLevel()
-        );
-    }
+
 }

@@ -31,20 +31,27 @@ public class SecurityConfig {
                 // Routes publiques
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                
                 // Register nécessite JWT valide
+                // Regiter api n'est pas accessible à tous seul qui sont des admins 
                 .requestMatchers("/api/auth/register").authenticated()
+                
                 // Toutes les autres routes nécessitent JWT
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            // Gestion des erreurs 401 et 403
+            // Gestion des erreurs 401 et 403 
+            // accessdenied et authenticationentry sont des deux erreurs 
+            // lancé et intercepté par spring security 
+            // Le but c'est de clarifier l'ordre et le type d'erreur 
+            
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)  // 401 - Pas authentifié
                 .accessDeniedHandler(jwtAccessDeniedHandler)           // 403 - Pas autorisé
             )
-            // Ajouter le filtre JWT AVANT le filtre d'authentification de Spring
+            
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();

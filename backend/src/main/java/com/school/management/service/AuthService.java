@@ -3,10 +3,12 @@ package com.school.management.service;
 import com.school.management.dto.request.LoginRequest;
 import com.school.management.dto.request.RegisterRequest;
 import com.school.management.dto.response.LoginResponse;
+import com.school.management.dto.response.RegisterResponse;
 import com.school.management.entity.Admin;
 import com.school.management.exception.DuplicateResourceException;
 import com.school.management.exception.UnauthorizedException;
 import com.school.management.repository.AdminRepository;
+import com.school.management.mapper.AdminMapper;
 import com.school.management.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,22 +32,23 @@ public class AuthService {
         }
         // Génère un JWT
         String token = jwtUtil.generateToken(admin.getUsername());
-        return new LoginResponse(token, admin.getUsername());
+
+        return AdminMapper.toLoginResponse(admin, token);
     }
     
-    public void register(RegisterRequest request, String currentAdminUsername) {
+    public  RegisterResponse register(RegisterRequest request, String currentAdminUsername) {
     
     if (adminRepository.existsByUsername(request.getUsername())) {
         throw new DuplicateResourceException("Username already exists");
     }
 
-    Admin admin = new Admin(
-        null,
-        request.getUsername(),
-        passwordEncoder.encode(request.getPassword())
-    );
-
-    adminRepository.save(admin);
+    String encodedPassword = passwordEncoder.encode(request.getPassword());
+    
+    Admin admin = AdminMapper.toEntity(request, encodedPassword);
+    
+    Admin savedAdmin = adminRepository.save(admin);
+    
+    return AdminMapper.toRegisterResponse(savedAdmin);
 }
 
 }
